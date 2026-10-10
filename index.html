@@ -1,0 +1,895 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Vinish Venkatachalam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: one dark page. Hero with honeycomb hover, SQL playground that reveals one section at a time, bit-field footer. */
+:root {
+  --bg: #060a13;
+  --surface: #0a111f;
+  --surface-2: #0f192d;
+  --line: #172540;
+  --line-2: #243659;
+  --dot: #15223b;
+  --fg: #e8eef9;
+  --muted: #92a2bf;
+  --dim: #6b7c9b;
+  --accent: #3b9eff;
+  --accent-strong: #0a6fd0;
+  --accent-2: #ff9a4d;
+  --ok: #3ddc97;
+  --err: #ff6b6b;
+  --folder: #e0b55f;
+  --water: rgba(59, 158, 255, 0.38);
+  --font-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--font-mono); }
+h2 {
+  margin: 0;
+  font: 800 clamp(1.7rem, 3.6vw, 2.4rem)/1.1 var(--font-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.wrap { width: 100%; max-width: 1160px; margin-inline: auto; padding-inline: clamp(16px, 4vw, 40px); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(72px, 15vh, 150px) clamp(16px, 4vw, 40px) clamp(56px, 10vh, 108px);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  background: radial-gradient(ellipse 60% 55% at 50% 0%, rgba(59, 158, 255, 0.13), transparent 70%), var(--bg);
+}
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hero-inner { position: relative; z-index: 1; max-width: 1000px; margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.kicker { margin: 0; font: 500 0.9rem var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+h1 {
+  margin: 0;
+  font: 800 clamp(2.5rem, 7.6vw, 5.4rem)/0.98 var(--font-display);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.role { margin: 0; font: 500 clamp(1.1rem, 2.6vw, 1.55rem) var(--font-mono); color: var(--accent); }
+.us { animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.bio { margin: 6px 0 10px; max-width: 62ch; color: var(--muted); font-size: 1.05rem; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 22px;
+  text-decoration: none;  
+  background: var(--accent-strong);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: #fff;
+  font: 600 0.95rem var(--font-body);
+  transition: background 0.15s, transform 0.15s;
+}
+.btn-primary:hover { background: #1383f0; transform: translateY(-1px); }
+.btn-primary svg { width: 18px; height: 18px; }
+.note { margin: 0; min-height: 1.4em; font: 400 0.82rem var(--font-mono); color: var(--muted); }
+
+/* ---------- Playground ---------- */
+.pg { padding-block: clamp(48px, 8vw, 88px) clamp(28px, 5vw, 56px); }
+.pg-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 22px; }
+.pg-head p { margin: 0; color: var(--muted); max-width: 62ch; }
+.pg-head code { color: var(--fg); background: var(--surface-2); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; font-size: 0.88em; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  color: var(--muted);
+  font: 500 0.875rem var(--font-mono);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.chip svg { width: 15px; height: 15px; }
+.chip:hover { border-color: var(--accent); color: var(--fg); }
+.chip[aria-pressed="true"] { border-color: var(--accent); color: var(--fg); background: rgba(59, 158, 255, 0.13); }
+
+.term { border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.term-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 38px; padding: 0 14px; background: var(--surface-2); border-bottom: 1px solid var(--line); font: 500 0.78rem var(--font-mono); color: var(--muted); }
+.term-tab { color: var(--fg); }
+.term-body { display: flex; }
+.gutter { min-width: 46px; padding: 14px 12px 14px 14px; text-align: right; border-right: 1px solid var(--line); color: var(--dim); font: 400 1rem/1.7 var(--font-mono); white-space: pre; user-select: none; }
+.code { position: relative; flex: 1; min-width: 0; }
+.code pre, .code textarea {
+  margin: 0; padding: 14px 16px; border: 0;
+  font: 400 1rem/1.7 var(--font-mono);
+  letter-spacing: 0; tab-size: 2;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.code pre { min-height: 98px; color: var(--fg); pointer-events: none; }
+.code textarea { position: absolute; inset: 0; width: 100%; height: 100%; background: transparent; color: transparent; caret-color: var(--fg); resize: none; outline: none; overflow: hidden; }
+.code textarea::placeholder { color: var(--dim); }
+.kw { color: var(--accent); font-weight: 500; }
+.op { color: var(--accent-2); }
+.pn { color: var(--muted); }
+.caret { display: inline-block; width: 2px; height: 1.15em; margin-left: 1px; vertical-align: text-bottom; background: var(--fg); animation: blink 0.9s steps(1) infinite; }
+.term-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px 16px; padding: 10px 14px; border-top: 1px solid var(--line); background: var(--surface-2); }
+.status { flex: 1 1 220px; min-width: 0; min-height: 1.6em; margin: 0; display: flex; align-items: center; gap: 8px; font: 500 0.875rem var(--font-mono); }
+.status[data-kind="ok"] { color: var(--ok); }
+.status[data-kind="err"] { color: var(--err); }
+.actions { display: flex; gap: 8px; margin-left: auto; }
+.btn { padding: 8px 18px; border-radius: 6px; font: 600 0.875rem var(--font-body); border: 1px solid var(--line-2); background: transparent; color: var(--fg); transition: background 0.15s, border-color 0.15s; }
+.btn:hover { border-color: var(--muted); background: rgba(255, 255, 255, 0.04); }
+.btn.run { background: var(--accent-strong); border-color: rgba(255, 255, 255, 0.14); color: #fff; }
+.btn.run:hover { background: #1383f0; }
+
+/* ---------- Results ---------- */
+.results { padding-block: 8px clamp(44px, 8vw, 84px); scroll-margin-top: 16px; }
+.res-card { border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface); overflow: hidden; animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.res-head { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); font: 500 0.75rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.res-head .q { color: var(--muted); text-transform: none; letter-spacing: 0; }
+.panel { padding: clamp(16px, 3vw, 28px); }
+.panel > h2 { margin-bottom: 20px; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* Skills: pipeline canvas */
+.adf { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 380px; border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; }
+.adf-side { background: var(--surface-2); border-right: 1px solid var(--line-2); padding: 10px 0; min-width: 0; }
+.adf-side h3 { margin: 0; padding: 6px 16px 10px; font: 600 0.72rem var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.cats { list-style: none; margin: 0; padding: 0; }
+.cat { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 14px 9px 12px; background: none; border: 0; border-left: 2px solid transparent; text-align: left; color: var(--muted); font: 500 0.9rem var(--font-body); }
+.cat .chev { width: 14px; height: 14px; flex: none; }
+.cat-name { flex: 1; min-width: 0; }
+.cat-n { font: 400 0.72rem var(--font-mono); color: var(--dim); }
+.cat:hover { background: rgba(59, 158, 255, 0.07); color: var(--fg); }
+.cat[aria-pressed="true"] { background: rgba(59, 158, 255, 0.14); border-left-color: var(--accent); color: var(--fg); }
+.cat[aria-pressed="true"] .chev { transform: rotate(90deg); color: var(--accent); --cf: currentColor; }
+.adf-main { display: flex; flex-direction: column; min-width: 0; background-color: var(--surface); background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.3px); background-size: 20px 20px; }
+.adf-tabs { display: flex; align-items: center; height: 34px; padding: 0 14px; background: var(--surface-2); border-bottom: 1px solid var(--line); font: 500 0.78rem var(--font-mono); color: var(--muted); }
+.acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 16px; padding: 20px; align-content: start; }
+.act {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: flex; align-items: flex-start; gap: 10px;
+  min-height: 88px; padding: 12px 34px 12px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  border-radius: 6px;
+  animation: pop 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+  transition: border-color 0.2s;
+}
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+.act:hover, .act:focus-visible, .act.on { border-color: var(--accent); }
+.water { position: absolute; left: 0; right: 0; bottom: 0; height: 0; opacity: 0; z-index: -1; background: var(--water); transition: height 0.9s cubic-bezier(0.3, 0.7, 0.2, 1), opacity 0.25s ease 0.65s; }
+.water::before, .water::after {
+  content: ""; position: absolute; left: 0; width: 100%; height: 8px; top: -8px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 8' preserveAspectRatio='none'%3E%3Cpath d='M0 4Q12 0 24 4T48 4V8H0Z' fill='%233b9eff' fill-opacity='.38'/%3E%3C/svg%3E") repeat-x;
+  background-size: 48px 8px;
+}
+.water::before { animation: wave 2.6s linear infinite; }
+.water::after { top: -6px; opacity: 0.6; animation: wave 3.8s linear infinite reverse; }
+@keyframes wave { to { background-position-x: 48px; } }
+.act:hover .water, .act:focus-visible .water, .act.on .water { height: var(--lvl); opacity: 1; transition: height 1s cubic-bezier(0.3, 0.7, 0.2, 1), opacity 0.15s; }
+.act-ico { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 4px; background: rgba(59, 158, 255, 0.16); color: var(--accent); }
+.act-ico svg { width: 16px; height: 16px; }
+.act-text { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.act-type { font: 500 0.66rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.act-name { font: 600 0.95rem/1.25 var(--font-body); overflow-wrap: anywhere; }
+.act-pct { position: absolute; right: 30px; bottom: 8px; font: 500 0.82rem var(--font-mono); opacity: 0; transition: opacity 0.2s; }
+.act:hover .act-pct, .act:focus-visible .act-pct, .act.on .act-pct { opacity: 1; transition-delay: 0.35s; }
+.act-pin { position: absolute; right: 0; top: 50%; width: 24px; height: 24px; margin-top: -12px; display: grid; place-items: center; background: rgba(61, 220, 151, 0.14); border: 1px solid rgba(61, 220, 151, 0.4); border-right: 0; border-radius: 4px 0 0 4px; color: var(--ok); }
+.act-pin svg { width: 13px; height: 13px; }
+
+/* Projects: object explorer */
+.ssms { border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.ssms-bar { display: flex; align-items: center; gap: 8px; padding: 9px 14px; background: var(--surface-2); border-bottom: 1px solid var(--line-2); font: 600 0.82rem var(--font-body); }
+.ssms-bar svg { width: 15px; height: 15px; color: var(--accent); }
+.tree { padding: 8px 0 12px; }
+.tree ul { list-style: none; margin: 0; padding: 0; }
+.row { display: flex; align-items: center; gap: 6px; width: 100%; min-height: 30px; padding: 2px 14px 2px calc(10px + var(--lv, 0) * 22px); background: none; border: 0; text-align: left; font: 400 0.92rem var(--font-body); color: var(--fg); }
+.row:hover { background: rgba(59, 158, 255, 0.1); }
+.row.sel { background: rgba(59, 158, 255, 0.2); }
+.row span { min-width: 0; overflow-wrap: anywhere; }
+.chev { width: 14px; height: 14px; flex: none; color: var(--muted); transition: transform 0.15s; }
+.cp { fill: var(--cf, none); stroke: currentColor; stroke-width: 1.4; stroke-linejoin: round; }
+[aria-expanded="true"] > .row .chev { transform: rotate(90deg); --cf: currentColor; }
+.ico { width: 16px; height: 16px; flex: none; }
+.ico-folder { color: var(--folder); }
+.ico-file { color: var(--muted); }
+.row.file { padding-left: calc(10px + var(--lv, 0) * 22px + 20px); }
+.row.file:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.row.file:hover .ico-file { color: var(--accent); }
+
+/* Certifications: result grid */
+.grid-wrap { border: 1px solid var(--line-2); border-radius: 6px; overflow: hidden; }
+.grid-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; background: var(--surface-2); border-bottom: 1px solid var(--line-2); font: 500 0.75rem var(--font-mono); color: var(--muted); }
+.grid-scroll { overflow-x: auto; }
+.grid { width: 100%; min-width: 780px; border-collapse: collapse; font-size: 0.9rem; }
+.grid th { padding: 9px 14px; text-align: left; white-space: nowrap; background: var(--surface-2); border-bottom: 1px solid var(--line-2); border-right: 1px solid var(--line); font: 600 0.78rem var(--font-body); color: var(--muted); }
+.grid td { padding: 11px 14px; white-space: nowrap; border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+.grid tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.018); }
+.grid tbody tr:hover { background: rgba(59, 158, 255, 0.08); }
+.grid .rn { width: 46px; text-align: center; font: 400 0.8rem var(--font-mono); color: var(--dim); background: var(--surface-2); }
+.dot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px rgba(61, 220, 151, 0.18); }
+.link { padding: 0; background: none; border: 0; color: var(--accent); font: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.link:hover { color: #86c3ff; }
+.grid-foot { padding: 8px 14px; background: var(--surface-2); border-top: 1px solid var(--line-2); font: 400 0.75rem var(--font-mono); color: var(--dim); }
+
+/* Contact */
+.form { display: grid; gap: 20px; max-width: 760px; }
+.field { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 6px 20px; align-items: start; }
+.field label { padding-top: 11px; font: 700 1rem var(--font-display); }
+.opt { margin-left: 6px; font: 400 0.7rem var(--font-mono); color: var(--dim); }
+.field input, .field textarea { width: 100%; padding: 11px 14px; background: var(--bg); border: 1px solid var(--line-2); border-radius: 6px; color: var(--fg); font: 400 1rem var(--font-body); }
+.field textarea { min-height: 176px; resize: vertical; }
+.field input::placeholder, .field textarea::placeholder { color: var(--dim); }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59, 158, 255, 0.2); }
+.field .err { grid-column: 2; margin: 0; color: var(--err); font-size: 0.85rem; }
+.form-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; padding-left: 200px; }
+.form-note { margin: 0; flex: 1 1 240px; font: 400 0.85rem var(--font-mono); color: var(--muted); }
+
+/* ---------- Footer ---------- */
+.foot { overflow: hidden; border-top: 1px solid var(--line); padding-top: clamp(36px, 6vw, 64px); }
+.socials { display: flex; justify-content: center; gap: 16px; margin-bottom: clamp(20px, 4vw, 40px); }
+.soc { width: 52px; height: 52px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 50%; color: var(--muted); transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s; }
+.soc:hover { color: var(--fg); border-color: var(--accent); background: rgba(59, 158, 255, 0.13); transform: translateY(-2px); }
+.soc svg { width: 22px; height: 22px; }
+.bigname { position: relative; padding: 0.04em clamp(8px, 2vw, 24px) 10px; }
+.bigname canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+.bigtext { display: block; margin: 0; font: 800 22vw/0.84 var(--font-display); letter-spacing: -0.04em; text-align: center; white-space: nowrap; color: #1a2946; user-select: none; }
+.bigtext span { display: inline-block; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .bigtext span { background: linear-gradient(180deg, #355285 0%, #15223e 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+}
+
+/* ---------- Dialog ---------- */
+.modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; }
+.backdrop { position: absolute; inset: 0; background: rgba(3, 6, 12, 0.74); backdrop-filter: blur(3px); }
+.dialog { position: relative; width: min(520px, 100%); max-height: min(82vh, 680px); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line-2); border-radius: 8px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6); animation: rise 0.25s ease both; }
+.dialog.wide { width: min(720px, 100%); }
+.dlg-bar { display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line-2); border-radius: 8px 8px 0 0; }
+.dlg-bar > svg { width: 16px; height: 16px; flex: none; color: var(--muted); }
+.dlg-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 0.92rem var(--font-body); }
+.ro { padding: 2px 7px; border: 1px solid var(--line-2); border-radius: 3px; font: 500 0.64rem var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.x { width: 32px; height: 32px; flex: none; display: grid; place-items: center; background: none; border: 0; border-radius: 4px; color: var(--muted); }
+.x svg { width: 16px; height: 16px; }
+.x:hover { background: rgba(255, 107, 107, 0.2); color: var(--fg); }
+.dlg-body { padding: 18px 20px 22px; overflow: auto; }
+.ro-box { margin: 0; padding: 14px 16px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; font: 400 0.9rem/1.7 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; color: var(--fg); }
+.cert-ph { aspect-ratio: 1.414 / 1; max-width: 100%; display: grid; place-items: center; padding: 16px; text-align: center; border: 1.5px dashed var(--line-2); border-radius: 6px; color: var(--dim); background: repeating-linear-gradient(45deg, transparent 0 10px, rgba(59, 158, 255, 0.04) 10px 20px); }
+.cert-ph strong { display: block; color: var(--muted); font: 600 1rem var(--font-body); }
+.cert-ph span { font-size: 0.85rem; }
+.cert-img { display: block; width: 100%; height: auto; border: 1px solid var(--line-2); border-radius: 6px; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 20px; margin: 18px 0 0; }
+.meta dt { font: 500 0.68rem var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+.meta dd { margin: 2px 0 0; font-size: 0.92rem; overflow-wrap: anywhere; }
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 760px) {
+  .adf { grid-template-columns: minmax(0, 1fr); }
+  .adf-side { border-right: 0; border-bottom: 1px solid var(--line-2); padding-bottom: 8px; }
+  .cats { display: flex; overflow-x: auto; padding: 0 8px; }
+  .cat { width: auto; white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; }
+  .cat[aria-pressed="true"] { border-bottom-color: var(--accent); }
+  .cat .chev { display: none; }
+  .acts { padding: 14px; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(138px, 1fr)); }
+}
+@media (max-width: 600px) {
+  .field { grid-template-columns: minmax(0, 1fr); }
+  .field label { padding-top: 0; }
+  .field .err { grid-column: 1; }
+  .form-foot { padding-left: 0; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-chev" viewBox="0 0 16 16"><path class="cp" d="M5.5 3.5 10.8 8l-5.3 4.5z"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 16 16"><path d="M1 3.5a1 1 0 0 1 1-1h3.6L7.100 4H14a1 1 0 0 1 1 1v7.500a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1z" fill="currentColor"/></symbol>
+  <symbol id="i-file" viewBox="0 0 16 16"><path d="M3.500 1.500h6l3 3v10h-9z M9.500 1.500v3h3 M5.500 8h5 M5.500 10.500h5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-x" viewBox="0 0 16 16"><path d="M3.500 3.500l9 9M12.500 3.500l-9 9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-table" viewBox="0 0 16 16"><path d="M2 4.200C2 3.500 2.500 3 3.200 3h9.600c.7 0 1.200.5 1.200 1.200v7.600c0 .7-.5 1.200-1.200 1.200H3.200C2.500 13 2 12.500 2 11.800z M2 6.800h12 M2 9.800h12 M6.500 3v10" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 16 16"><path d="M1.500 8h3 M11.500 8h3 M4.500 4.500h7v7h-7z M8 4.500V2.500 M8 13.500v-2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.500 8.500l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 16 16"><path d="M8 2.500v7.500 M4.800 7.200L8 10.400l3.200-3.200 M3 13h10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-db" viewBox="0 0 16 16"><path d="M2.500 4c0-1 2.400-1.800 5.500-1.800S13.500 3 13.500 4v8c0 1-2.400 1.800-5.500 1.800S2.500 13 2.500 12z M2.500 4c0 1 2.400 1.800 5.500 1.800S13.500 5 13.500 4 M2.500 8c0 1 2.400 1.800 5.500 1.800S13.500 9 13.500 8" fill="none" stroke="currentColor" stroke-width="1.2"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8.200" r="1.300" fill="currentColor"/><rect x="7" y="10.500" width="2" height="6.500" fill="currentColor"/><path d="M11 10.500h2v1c.5-.8 1.400-1.200 2.400-1.200 2 0 2.600 1.300 2.600 3.200V17h-2v-3.300c0-.9-.2-1.600-1.200-1.600s-1.800.7-1.800 1.700V17h-2z" fill="currentColor"/></symbol>
+  <symbol id="i-gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.630 0-12 5.373-12 12 0 5.303 3.438 9.800 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.040-.015-2.040-3.338.724-4.042-1.610-4.042-1.610C4.422 18.070 3.633 17.700 3.633 17.700c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.070 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.760-1.605-2.665-.3-5.466-1.332-5.466-5.930 0-1.310.465-2.380 1.235-3.220-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.300 1.230.96-.267 1.980-.399 3-.405 1.020.006 2.040.138 3 .405 2.280-1.552 3.285-1.230 3.285-1.230.645 1.653.24 2.873.12 3.176.765.84 1.230 1.910 1.230 3.220 0 4.610-2.805 5.625-5.475 5.920.42.36.81 1.096.81 2.220 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="4.200" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="17.200" cy="6.800" r="1.200" fill="currentColor"/></symbol>
+</svg>
+
+<main>
+  <!-- Home -->
+  <section class="hero" id="home">
+    <canvas id="hexc" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <p class="kicker">Hi, I'm</p>
+      <h1>Vinish Venkatachalam</h1>
+      <p class="role">Data Engineer<span class="us" aria-hidden="true">_</span></p>
+      <p class="bio">Data Engineer | Azure | Databricks | PySpark | SQL<br>I build reliable data pipelines and analytics-ready solutions, transforming raw data into trusted insights.</p>
+      <a class="btn-primary" href="Vinish_CV.pdf" download="Vinish_CV.pdf" id="resume"><svg aria-hidden="true"><use href="#i-dl"/></svg>Download Resume</a>
+    </div>
+  </section>
+
+  <!-- SQL playground -->
+  <section class="pg wrap" id="playground" aria-labelledby="pg-title">
+    <div class="pg-head">
+      <h2 id="pg-title">SQL Playground</h2>
+      <p>Pick a table below or type a query, then submit it. Try <code>select * from skills</code>.</p>
+    </div>
+    <div class="chips" role="group" aria-label="Tables">
+      <button type="button" class="chip" data-t="skills" aria-pressed="false"><svg aria-hidden="true"><use href="#i-table"/></svg>Skills</button>
+      <button type="button" class="chip" data-t="projects" aria-pressed="false"><svg aria-hidden="true"><use href="#i-table"/></svg>Projects</button>
+      <button type="button" class="chip" data-t="certifications" aria-pressed="false"><svg aria-hidden="true"><use href="#i-table"/></svg>Certifications</button>
+      <button type="button" class="chip" data-t="contact" aria-pressed="false"><svg aria-hidden="true"><use href="#i-table"/></svg>Contact</button>
+    </div>
+    <div class="term">
+      <div class="term-bar"><span class="term-tab">query.sql</span><span>portfolio_db</span></div>
+      <div class="term-body">
+        <div class="gutter" id="gutter" aria-hidden="true">1</div>
+        <div class="code">
+          <pre id="hl" aria-hidden="true"></pre>
+          <textarea id="sql" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="SQL query" placeholder="select * from skills"></textarea>
+        </div>
+      </div>
+      <div class="term-foot">
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+        <div class="actions">
+          <button type="button" class="btn" id="reset">Reset</button>
+          <button type="button" class="btn run" id="run">Submit</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Result of the query -->
+  <section class="results wrap" id="results" hidden tabindex="-1" aria-label="Query result">
+    <div class="res-card">
+      <div class="res-head"><span>Result set</span><span class="q" id="res-q"></span></div>
+
+      <div class="panel" id="panel-skills" hidden>
+        <h2>Skills</h2>
+        <div class="adf">
+          <div class="adf-side"><h3>Activities</h3><ul class="cats" id="cats"></ul></div>
+          <div class="adf-main">
+            <div class="adf-tabs">pl_skills</div>
+            <div class="acts" id="acts" role="list" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-projects" hidden>
+        <h2>Projects</h2>
+        <div class="ssms">
+          <div class="ssms-bar"><svg aria-hidden="true"><use href="#i-db"/></svg>Object Explorer</div>
+          <div class="tree" id="tree" role="tree" aria-label="Projects"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-certifications" hidden>
+        <h2>Certifications</h2>
+        <div class="grid-wrap">
+          <div class="grid-top"><span>Result Grid</span><span id="cert-count"></span></div>
+          <div class="grid-scroll">
+            <table class="grid">
+              <thead><tr><th class="rn"></th><th>Certificate Name</th><th>Issuer</th><th>Issued Date</th><th>Expiry Date</th><th>Status</th><th>Check</th></tr></thead>
+              <tbody id="cert-body"></tbody>
+            </table>
+          </div>
+          <div class="grid-foot" id="cert-foot"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-contact" hidden>
+        <h2>Contact Me</h2>
+        <form class="form" id="form" novalidate>
+          <div class="field">
+            <label for="c-name">Name</label>
+            <input id="c-name" name="name" type="text" autocomplete="name" placeholder="Vinish Venkatachalam" aria-describedby="e-name">
+            <p class="err" id="e-name" hidden></p>
+          </div>
+          <div class="field">
+            <label for="c-email">Email</label>
+            <input id="c-email" name="email" type="email" autocomplete="email" placeholder="vinishvenkatachalam29@gmail.com" aria-describedby="e-email">
+            <p class="err" id="e-email" hidden></p>
+          </div>
+          <div class="field">
+            <label for="c-phone">Phone Number<span class="opt">optional</span></label>
+            <input id="c-phone" name="phone" type="tel" autocomplete="tel" placeholder="+91 98947 31669" aria-describedby="e-phone">
+            <p class="err" id="e-phone" hidden></p>
+          </div>
+          <div class="field">
+            <label for="c-msg">Message</label>
+            <textarea id="c-msg" name="message" placeholder="Hi Vinish, I found your portfolio and would like to talk about a data engineering role." aria-describedby="e-msg"></textarea>
+            <p class="err" id="e-msg" hidden></p>
+          </div>
+          <div class="form-foot">
+            <button type="submit" class="btn-primary">Send message</button>
+            <p class="form-note" id="form-note" role="status"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <nav class="socials" aria-label="Social links">
+    <!-- Replace each href with your own profile URL. -->
+    <a class="soc" href="https://www.linkedin.com/in/vinish-venkatachalam-96ab561b3/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-in"/></svg><span class="sr">LinkedIn</span></a>
+    <a class="soc" href="https://github.com/Vinish-Venkatachalam" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-gh"/></svg><span class="sr">GitHub</span></a>
+    <a class="soc" href="https://www.instagram.com/vini_versal/" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-ig"/></svg><span class="sr">Instagram</span></a>
+  </nav>
+  <div class="bigname" id="bigname">
+    <div class="bigtext" id="bigtext" aria-label="VINISH"><span aria-hidden="true">VINISH</span></div>
+    <canvas id="bitc" aria-hidden="true"></canvas>
+  </div>
+</footer>
+
+<div class="modal" id="modal" hidden>
+  <div class="backdrop" data-close></div>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+    <div class="dlg-bar">
+      <svg aria-hidden="true"><use href="#i-file"/></svg>
+      <span class="dlg-title" id="dlg-title"></span>
+      <span class="ro" id="dlg-ro">read-only</span>
+      <button type="button" class="x" data-close aria-label="Close"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dlg-body" id="dlg-body"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* =====================================================================
+   CONTENT. Everything below is sample content: edit it freely.
+   ===================================================================== */
+
+// Skills: one entry per category. Each item is [skill name, level 0-100].
+const SKILLS = [
+  { cat: 'Programming', items: [
+    ['Python', 75], ['Core Java', 70], ['Azure Databricks', 85] ] },
+  { cat: 'Query Language', items: [
+    ['SQL', 90], ['PL/SQL', 80], ['Spark SQL', 85], ['DDL', 95] ] },
+  { cat: 'Microsoft Azure', items: [
+    ['Azure Data Factory (ADF)', 85], ['Azure Databricks', 85], ['Azure Synapse Analytics', 80], ['ADLS Gen2', 80], ['Azure Cosmos DB', 80] ] },
+  { cat: 'Data Engineering', items: [
+    ['Data Pipelines', 85], ['ETL/ELT', 90], ['Data Transformation', 90], ['Data Validation & Cleansing', 80], ['Data Wrangling', 80],
+    ['Incremental Data Processing', 80], ['Change Data Capture (CDC)', 75], ['Medallion Architecture', 85], ['Slowly Changing Dimensions (SCD)', 80], ['Data Lakes', 80] ] },
+  { cat: 'Big Data & Data Platforms', items: [
+    ['Apache Spark', 85], ['PySpark', 85], ['Hadoop', 60], ['Delta Lake', 75], ['Apache Kafka', 60] ] },
+  { cat: 'Databases & Tools', items: [
+    ['SQL Server', 80], ['SSMS', 85], ['Docker', 60] ] },
+  { cat: 'Analytics & Visualization', items: [
+    ['Power BI', 80], ['DAX', 70], ['Data Modeling', 85], ['DOMO', 70], ['Dashboard Design', 80] ] },
+  { cat: 'Operating Systems', items: [
+    ['Windows', 90], ['Linux', 80] ] },
+  { cat: 'DevOps & Tools', items: [
+    ['Git', 70], ['Azure DevOps', 75], ['CI/CD Pipelines', 65], ['Jira', 75], ['Agile / Scrum', 80] ] }
+];
+
+// Projects: the first group is Professional, the second is Personal.
+const PROJECTS = [
+  { group: 'Professional Projects', items: [
+    { name: 'Data Modernization',
+      description:  [
+        '• Enhanced and maintained cloud-based data pipelines using Azure Data Factory, Azure Synapse Analytics, PySpark, SQL, and ADLS Gen2 to ingest, transform, validate, and prepare Salesforce data for analytics.',
+        '• Built and scheduled 100+ ADF dataflows supporting data ingestion, transformation, and downstream processing.',
+        '• Created Silver and Gold layer transformations using Synapse SQL and PySpark following the Bronze/Silver/Gold Medallion Architecture.',
+        '• Generated SQL transformation scripts and analytical gold tables to provide reliable, analytics-ready datasets for reporting.',
+        '• Carried out source-to-target validation, data cleansing, reconciliation, and data quality analysis across Salesforce and Azure data platforms.',
+        '• Assisted 15+ Power BI dashboards, including 10+ dashboards and 70+ visuals, by validating datasets and underlying transformations.',
+        '• Collaborated with the Data Modelling team on Salesforce join configurations supporting 25+ dashboards.',
+        '• Assisted migration of existing 25+ DOMO pipelines and dashboards to Power BI, including data validation and report testing.',
+        '• Planned and aided incremental CDC data processing for analytical data pipelines.'
+      ].join('\n'),
+      tools: ['Azure Data Factory', 'ADLS Gen2', 'SQL', 'Spark', 'Salesforce', 'Azure Synapse Analytics','Power BI','DOMO','ETL/ELT','Medallion Architecture','Analytics Engineering'],
+      duration: 'DEC 2024 - AUG 2025' },
+    { name: 'DDF Data Consolidation',
+      description: [
+        '• Performed data consolidation and migration activities across Salesforce and Azure Cosmos DB.',
+        '• Migrated new and updated records from Salesforce to Cosmos DB while ensuring data consistency.',
+        '• Analyzed source-to-target discrepancies across Profile, Profile Roles, Membership, Contact, Account, and related entities.',
+        '• Developed and enhanced reusable Python validation scripts with dynamic object and column parameters for cross-dataset validation.',
+        '• Performed data cleansing, reconciliation, and data quality analysis to identify and resolve inconsistencies.',
+        '• Conducted root-cause analysis on synchronization issues and supported corrective data actions.',
+        '• Executed SQL-based validation and analysis to verify data accuracy across source and target systems.'
+      ].join('\n'),
+      tools: ['Azure Cosmos DB', 'SQL', 'Azure Data Factory', 'Data Reconciliation', 'Root Cause Analysis','Data Consolidation'],
+      duration: 'SEPT 2025 - NOV 2025' },
+    { name: 'Membership Application Support',
+      description: [
+        '• Supported a production membership-registration application involving Salesforce, Azure Cosmos DB, Azure Data Factory, Azure Functions, SQL Server, Python, and Postman.',
+        '• Investigated and resolved production data synchronization and data quality issues across Profile, Profile Roles, Membership, Contact, Account, and related entities.',
+        '• Performed SQL-based data analysis, cleansing, reconciliation, and database activities across production and QA environments.',
+        '• Troubleshot data pipeline and synchronization issues across Salesforce, Azure services, and downstream systems.',
+        '• Conducted root-cause analysis for application and data issues and supported appropriate corrective actions.',
+        '• Collaborated with cross-functional teams to investigate incidents, validate fixes, and maintain data consistency across systems.',
+        '• Supported QA deployments and production data activities while ensuring application and data integrity.'
+      ].join('\n'),
+      tools: ['Azure Data Factory', 'SQL', 'SSMS', 'Cosmos DB', 'Python','Data Troubleshooting','Application Support','Production Support','Data Quality'],
+      duration: 'DEC 2025 - SEPT 2026' }
+  ] },
+  { group: 'Personal Projects', items: [
+    { name: 'Retail Data Engineering & AI Analytics ',
+      description: [
+        '• Designed an end-to-end retail data engineering platform integrating 8+ business entities including orders, customers, products, inventory, branches, and transactions, with automated data ingestion and transformation workflows.',
+        '• Implemented a Bronze/Silver/Gold Medallion Architecture using Delta tables for ingestion, cleansing, transformation, and analytical processing.',
+        '• Developed PySpark and SQL transformations to build analytics-ready datasets for sales, customer, product, inventory, and branch analysis.',
+        '• Implemented incremental data processing and explored MERGE-based upserts and Slowly Changing Dimensions (SCD) for maintaining historical data.'
+      ].join('\n'),
+      tools: ['Azure Databricks', 'PySpark', 'Python', 'SQL', 'Azure Blob Storage', 'Delta Lake'],
+      duration: 'FEB 2026 - MAR 2026' }
+  ] }
+];
+
+// Certifications. Every row is shown as Active with a green dot.
+const CERTS = [
+  { name: 'Databricks Certified Data Engineer Associate', issuer: 'Databricks', issued: 'OCT 2025', expiry: 'OCT 2027', status: 'Active',image: 'certs/databricks-data-engineer.png' },
+  { name: 'Microsoft Certified: Azure Data Fundamentals (DP-900)', issuer: 'Microsoft', issued: 'JUN 2025', expiry: 'No expiry', status: 'Active',  image: 'certs/azure-dp900.png'  }
+];
+
+/* ===================================================================== */
+
+const $ = (s, r = document) => r.querySelector(s);
+const el = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarse = matchMedia('(hover: none)').matches;
+
+/* ---------- Hover fields: honeycomb in the hero, bits in the footer ---------- */
+function field(host, canvas, o) {
+  const ctx = canvas.getContext('2d');
+  let w = 0, h = 0, cols = 0, rows = 0, heat = new Float32Array(0), raf = 0, last = 0, px = -1e4, py = -1e4, inside = false;
+  function size() {
+    const r = host.getBoundingClientRect();
+    w = r.width; h = r.height;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.round(w * dpr));
+    canvas.height = Math.max(1, Math.round(h * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (o.setup) o.setup(ctx);
+    cols = Math.ceil(w / o.dx) + 3;
+    rows = Math.ceil(h / o.dy) + 3;
+    heat = new Float32Array(cols * rows);
+    if (o.init) o.init(cols * rows);
+  }
+  function poke() {
+    const r0 = Math.max(0, Math.floor((py - o.rad) / o.dy) - 1), r1 = Math.min(rows - 1, Math.ceil((py + o.rad) / o.dy) + 2);
+    const c0 = Math.max(0, Math.floor((px - o.rad) / o.dx) - 2), c1 = Math.min(cols - 1, Math.ceil((px + o.rad) / o.dx) + 2);
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+      const p = o.pos(c, r);
+      const d = Math.hypot(p[0] - px, p[1] - py);
+      if (d < o.rad) {
+        const t = 1 - d / o.rad, v = t * t * (3 - 2 * t), i = r * cols + c;
+        if (v > heat[i]) heat[i] = v;
+      }
+    }
+  }
+  function frame(t) {
+    const dt = Math.min(64, t - last || 16); last = t;
+    const k = Math.exp(-dt / o.fade);
+    ctx.clearRect(0, 0, w, h);
+    if (inside) poke();
+    let alive = false;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      let v = heat[i];
+      if (v < 0.012) { heat[i] = 0; continue; }
+      v *= k; heat[i] = v;
+      if (v < 0.012) { heat[i] = 0; continue; }
+      alive = true;
+      const p = o.pos(c, r);
+      o.draw(ctx, p[0], p[1], v, i);
+    }
+    raf = (alive || inside) ? requestAnimationFrame(frame) : 0;
+  }
+  function start() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
+  function move(e) {
+    const r = host.getBoundingClientRect();
+    px = e.clientX - r.left; py = e.clientY - r.top; inside = true; start();
+  }
+  host.addEventListener('pointermove', move);
+  host.addEventListener('pointerdown', move);
+  host.addEventListener('pointerleave', () => { inside = false; start(); });
+  new ResizeObserver(size).observe(host);
+  size();
+}
+
+const HEX_R = 30, HEX_W = Math.sqrt(3) * HEX_R, HEX_V = 1.5 * HEX_R;
+field($('#home'), $('#hexc'), {
+  dx: HEX_W, dy: HEX_V, rad: 190, fade: 300,
+  pos: (c, r) => [(c - 1) * HEX_W + ((r & 1) ? HEX_W / 2 : 0), (r - 1) * HEX_V],
+  draw: (ctx, x, y, v) => {
+    ctx.beginPath();
+    for (let k = 0; k < 6; k++) {
+      const a = Math.PI / 180 * (60 * k + 30);
+      const hx = x + (HEX_R - 2) * Math.cos(a), hy = y + (HEX_R - 2) * Math.sin(a);
+      if (k) ctx.lineTo(hx, hy); else ctx.moveTo(hx, hy);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(59,158,255,' + (v * 0.16).toFixed(3) + ')';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(96,182,255,' + (v * 0.75).toFixed(3) + ')';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+});
+
+const BIT_W = 15, BIT_H = 22;
+let bits = new Uint8Array(0);
+field($('#bigname'), $('#bitc'), {
+  dx: BIT_W, dy: BIT_H, rad: 210, fade: 380,
+  setup: ctx => { ctx.font = '500 14px "JetBrains Mono", ui-monospace, monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; },
+  init: n => { bits = new Uint8Array(n); for (let i = 0; i < n; i++) bits[i] = Math.random() < 0.5 ? 1 : 0; },
+  pos: (c, r) => [c * BIT_W + BIT_W / 2, r * BIT_H + BIT_H / 2],
+  draw: (ctx, x, y, v, i) => {
+    if (v > 0.4 && Math.random() < 0.03) bits[i] ^= 1;
+    ctx.fillStyle = 'rgba(110,190,255,' + (v * 0.95).toFixed(3) + ')';
+    ctx.fillText(String(bits[i]), x, y);
+  }
+});
+
+/* Scale VINISH to the full width of the footer. */
+(function fitName() {
+  const box = $('#bigname'), text = $('#bigtext'), span = text.firstElementChild;
+  let lastW = 0;
+  function fit() {
+    const cs = getComputedStyle(box);
+    const inner = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    if (inner <= 0) return;
+    text.style.fontSize = '100px';
+    const w = span.getBoundingClientRect().width;
+    if (w > 0) text.style.fontSize = (inner / w * 100 * 0.995).toFixed(2) + 'px';
+  }
+  new ResizeObserver(() => { if (box.clientWidth !== lastW) { lastW = box.clientWidth; fit(); } }).observe(box);
+  fit();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+})();
+
+/* ---------- Dialog ---------- */
+const modal = $('#modal'), dlg = $('.dialog', modal), dlgTitle = $('#dlg-title'), dlgBody = $('#dlg-body'), dlgRo = $('#dlg-ro'), dlgClose = $('.x', modal);
+let lastFocus = null;
+function openModal(o) {
+  lastFocus = document.activeElement;
+  dlgTitle.textContent = o.title;
+  dlgBody.replaceChildren(o.body);
+  dlg.classList.toggle('wide', !!o.wide);
+  dlgRo.hidden = !o.ro;
+  modal.hidden = false;
+  dlgClose.focus();
+}
+function closeModal() {
+  modal.hidden = true;
+  dlgBody.replaceChildren();
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+modal.addEventListener('click', e => { if (e.target.closest('[data-close]')) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (modal.hidden) return;
+  if (e.key === 'Escape') closeModal();
+  else if (e.key === 'Tab') { e.preventDefault(); dlgClose.focus(); }
+});
+
+/* ---------- Skills ---------- */
+const cats = $('#cats'), acts = $('#acts');
+const catBtns = SKILLS.map((s, i) => {
+  const li = el('li'), b = el('button', 'cat');
+  b.type = 'button';
+  b.setAttribute('aria-pressed', 'false');
+  b.innerHTML = '<svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg><span class="cat-name">' + esc(s.cat) + '</span><span class="cat-n">' + s.items.length + '</span>';
+  b.addEventListener('click', () => pickCat(i));
+  li.append(b); cats.append(li);
+  return b;
+});
+function pickCat(i) {
+  catBtns.forEach((b, j) => b.setAttribute('aria-pressed', String(i === j)));
+  const s = SKILLS[i];
+  acts.replaceChildren(...s.items.map((it, j) => {
+    const d = el('div', 'act');
+    d.setAttribute('role', 'listitem');
+    d.tabIndex = 0;
+    d.style.setProperty('--lvl', it[1] + '%');
+    d.style.setProperty('--i', j);
+    d.setAttribute('aria-label', it[0] + ', ' + it[1] + ' percent');
+    d.innerHTML = '<div class="water" aria-hidden="true"></div>' +
+      '<span class="act-ico"><svg aria-hidden="true"><use href="#i-flow"/></svg></span>' +
+      '<span class="act-text"><span class="act-type">' + esc(s.cat) + '</span><span class="act-name">' + esc(it[0]) + '</span></span>' +
+      '<span class="act-pct">' + it[1] + '%</span>' +
+      '<span class="act-pin" aria-hidden="true"><svg><use href="#i-check"/></svg></span>';
+    if (coarse) d.addEventListener('click', () => d.classList.toggle('on'));
+    return d;
+  }));
+}
+
+/* ---------- Projects: object explorer ---------- */
+const tree = $('#tree');
+let selRow = null;
+function selectRow(b) { if (selRow) selRow.classList.remove('sel'); selRow = b; b.classList.add('sel'); }
+function folder(label, lv, kids) {
+  const li = el('li'), b = el('button', 'row'), ul = el('ul');
+  li.setAttribute('role', 'treeitem'); li.setAttribute('aria-expanded', 'false');
+  b.type = 'button'; b.style.setProperty('--lv', lv);
+  b.innerHTML = '<svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg><svg class="ico ico-folder" aria-hidden="true"><use href="#i-folder"/></svg><span>' + esc(label) + '</span>';
+  ul.setAttribute('role', 'group'); ul.hidden = true;
+  kids.forEach(k => ul.append(k));
+  b.addEventListener('click', () => {
+    const open = li.getAttribute('aria-expanded') === 'true';
+    li.setAttribute('aria-expanded', String(!open));
+    ul.hidden = open;
+    selectRow(b);
+  });
+  li.append(b, ul);
+  return li;
+}
+function file(label, lv, onOpen) {
+  const li = el('li'), b = el('button', 'row file');
+  li.setAttribute('role', 'treeitem');
+  b.type = 'button'; b.style.setProperty('--lv', lv);
+  b.innerHTML = '<svg class="ico ico-file" aria-hidden="true"><use href="#i-file"/></svg><span>' + esc(label) + '</span>';
+  b.addEventListener('click', () => { selectRow(b); onOpen(); });
+  li.append(b);
+  return li;
+}
+function openDoc(p, kind) {
+  const box = el('pre', 'ro-box');
+  let title;
+  if (kind === 'description') { box.textContent = p.description; title = 'Description'; }
+  else if (kind === 'tools') { box.textContent = p.tools.map(t => '- ' + t).join('\n'); title = 'Skills & Tools Used'; }
+  else { box.textContent = p.duration; title = 'Duration'; }
+  openModal({ title: title + ' - ' + p.name, body: box, ro: true });
+}
+PROJECTS.forEach(g => {
+  tree.append(folder(g.group, 0, g.items.map(p => folder(p.name, 1, [
+    folder('Description', 2, [file('Description.txt', 3, () => openDoc(p, 'description'))]),
+    folder('Skills & Tools Used', 2, [file('Skills_and_Tools.txt', 3, () => openDoc(p, 'tools'))]),
+    folder('Duration', 2, [file('Duration.txt', 3, () => openDoc(p, 'duration'))])
+  ]))));
+});
+// Group the top-level nodes in one list so the tree reads as a single list.
+(() => {
+  const ul = el('ul'); ul.setAttribute('role', 'group');
+  [...tree.children].forEach(c => ul.append(c));
+  tree.append(ul);
+})();
+
+/* ---------- Certifications ---------- */
+$('#cert-body').innerHTML = CERTS.map((c, i) =>
+  '<tr><td class="rn">' + (i + 1) + '</td><td>' + esc(c.name) + '</td><td>' + esc(c.issuer) + '</td><td>' + esc(c.issued) + '</td><td>' + esc(c.expiry) +
+  '</td><td><span class="dot" aria-hidden="true"></span>' + esc(c.status) + '</td><td><button type="button" class="link" data-i="' + i + '" aria-label="View ' + esc(c.name) + '">view</button></td></tr>'
+).join('');
+$('#cert-count').textContent = CERTS.length + ' rows';
+$('#cert-foot').textContent = 'Result 1 - ' + CERTS.length + ' rows returned';
+$('#cert-body').addEventListener('click', e => {
+  const b = e.target.closest('.link');
+  if (!b) return;
+  const c = CERTS[+b.dataset.i], body = el('div');
+  body.innerHTML = (c.image
+  ? '<img class="cert-img" src="' + esc(c.image) + '" alt="Certificate: ' + esc(c.name) + '">'
+  : '<div class="cert-ph"><div><strong>Certificate image</strong><span>Add an image path to this certificate.</span></div></div>') +
+    '<dl class="meta"><div><dt>Certificate</dt><dd>' + esc(c.name) + '</dd></div><div><dt>Issuer</dt><dd>' + esc(c.issuer) + '</dd></div>' +
+    '<div><dt>Issued</dt><dd>' + esc(c.issued) + '</dd></div><div><dt>Expires</dt><dd>' + esc(c.expiry) + '</dd></div></dl>';
+  openModal({ title: c.name, body, wide: true, ro: false });
+});
+
+/* ---------- Contact form ---------- */
+const form = $('#form'), formNote = $('#form-note');
+function fieldErr(id, msg) {
+  const p = $('#e-' + id), inp = form.elements[{ name: 'name', email: 'email', phone: 'phone', msg: 'message' }[id]];
+  p.hidden = !msg; p.textContent = msg || '';
+  inp.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  return !msg;
+}
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  const f = form.elements;
+  let ok = true;
+  ok = fieldErr('name', f.name.value.trim() ? '' : 'Enter your name.') && ok;
+  ok = fieldErr('email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim()) ? '' : 'Enter a valid email address.') && ok;
+  ok = fieldErr('phone', !f.phone.value.trim() || /^[+\d][\d\s().-]{5,}$/.test(f.phone.value.trim()) ? '' : 'Enter a valid phone number or leave it empty.') && ok;
+  ok = fieldErr('msg', f.message.value.trim() ? '' : 'Write a short message.') && ok;
+  formNote.textContent = ok ? 'Form checked. No mail service is connected to this page yet, so nothing was sent.' : '';
+});
+
+/* ---------- SQL playground ---------- */
+const TABLES = ['skills', 'projects', 'certifications', 'contact'];
+const ta = $('#sql'), hl = $('#hl'), gutter = $('#gutter'), statusEl = $('#status'), chips = [...document.querySelectorAll('.chip')];
+const results = $('#results');
+let typing = false, typeTimer = 0, pending = '';
+
+function highlight(s) {
+  return s.split(/(\bselect\b|\bfrom\b|\*|;)/i).map(p => {
+    if (/^(select|from)$/i.test(p)) return '<span class="kw">' + esc(p) + '</span>';
+    if (p === '*') return '<span class="op">*</span>';
+    if (p === ';') return '<span class="pn">;</span>';
+    return esc(p);
+  }).join('');
+}
+function sync() {
+  hl.innerHTML = highlight(ta.value) + (typing ? '<span class="caret"></span>' : '') + '\n';
+  const n = ta.value.split('\n').length;
+  gutter.textContent = Array.from({ length: n }, (_, i) => i + 1).join('\n');
+}
+function setStatus(kind, msg) {
+  statusEl.dataset.kind = kind || '';
+  statusEl.textContent = '';
+  if (!kind) return;
+  const mark = el('span'); mark.setAttribute('aria-hidden', 'true'); mark.textContent = kind === 'ok' ? '✓' : '✕';
+  const t = el('span'); t.textContent = msg;
+  statusEl.append(mark, t);
+}
+function parse(q) {
+  const s = q.replace(/\s+/g, ' ').trim().replace(/(\s*;)+$/, '').trim();
+  const m = /^select\s*\*\s*from\s+([a-z_]+)$/i.exec(s);
+  const t = m ? m[1].toLowerCase() : null;
+  return TABLES.includes(t) ? t : null;
+}
+function cancelType() { clearTimeout(typeTimer); typing = false; }
+function typeInto(text) {
+  cancelType();
+  pending = text;
+  setStatus();
+  ta.value = '';
+  if (reduce) { ta.value = text; sync(); return; }
+  typing = true;
+  let i = 0;
+  sync();
+  (function step() {
+    i++;
+    ta.value = text.slice(0, i);
+    if (i >= text.length) { typing = false; sync(); return; }
+    sync();
+    typeTimer = setTimeout(step, 26 + Math.random() * 42);
+  })();
+}
+function pressChip(t) { chips.forEach(c => c.setAttribute('aria-pressed', String(c.dataset.t === t))); }
+function hideResults() { results.hidden = true; }
+function showResults(t) {
+  document.querySelectorAll('.panel').forEach(p => { p.hidden = p.id !== 'panel-' + t; });
+  $('#res-q').textContent = 'select * from ' + t;
+  results.hidden = false;
+  requestAnimationFrame(() => results.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }));
+}
+function submit() {
+  if (typing) { cancelType(); ta.value = pending; sync(); }
+  const t = parse(ta.value);
+  if (!t) { setStatus('err', 'error: enter correct query'); pressChip(null); hideResults(); return; }
+  setStatus('ok', 'Query successfully submitted');
+  pressChip(t);
+  showResults(t);
+}
+function reset() {
+  cancelType();
+  ta.value = '';
+  sync(); setStatus(); pressChip(null); hideResults();
+  if (!coarse) ta.focus({ preventScroll: true });
+}
+chips.forEach(c => c.addEventListener('click', () => { pressChip(c.dataset.t); typeInto('select * from ' + c.dataset.t + ';'); }));
+ta.addEventListener('input', () => { cancelType(); setStatus(); sync(); });
+ta.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); submit(); }
+});
+$('#run').addEventListener('click', submit);
+$('#reset').addEventListener('click', reset);
+sync();
+})();
+</script>
+
+</body></html>
