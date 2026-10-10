@@ -398,6 +398,7 @@ h1 {
       <div class="panel" id="panel-contact" hidden>
         <h2>Contact Me</h2>
         <form class="form" id="form" novalidate>
+          <input type="checkbox" name="botcheck" id="c-bot" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
           <div class="field">
             <label for="c-name">Name</label>
             <input id="c-name" name="name" type="text" autocomplete="name" placeholder="Vinish Venkatachalam" aria-describedby="e-name">
@@ -790,6 +791,7 @@ $('#cert-body').addEventListener('click', e => {
 });
 
 /* ---------- Contact form ---------- */
+const WEB3FORMS_KEY = '6498b69f-8782-48b6-a706-e5004b8a6f2c';
 const form = $('#form'), formNote = $('#form-note');
 function fieldErr(id, msg) {
   const p = $('#e-' + id), inp = form.elements[{ name: 'name', email: 'email', phone: 'phone', msg: 'message' }[id]];
@@ -797,7 +799,7 @@ function fieldErr(id, msg) {
   inp.setAttribute('aria-invalid', msg ? 'true' : 'false');
   return !msg;
 }
-form.addEventListener('submit', e => {
+form.addEventListener('submit', async e => {
   e.preventDefault();
   const f = form.elements;
   let ok = true;
@@ -805,7 +807,32 @@ form.addEventListener('submit', e => {
   ok = fieldErr('email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email.value.trim()) ? '' : 'Enter a valid email address.') && ok;
   ok = fieldErr('phone', !f.phone.value.trim() || /^[+\d][\d\s().-]{5,}$/.test(f.phone.value.trim()) ? '' : 'Enter a valid phone number or leave it empty.') && ok;
   ok = fieldErr('msg', f.message.value.trim() ? '' : 'Write a short message.') && ok;
-  formNote.textContent = ok ? 'Form checked. No mail service is connected to this page yet, so nothing was sent.' : '';
+  if (!ok) { formNote.textContent = ''; return; }
+  if (f.botcheck.checked) { form.reset(); formNote.textContent = 'Message sent. Thank you!'; return; }
+  if (WEB3FORMS_KEY.startsWith('PASTE_')) { formNote.textContent = 'The contact form is not set up yet.'; return; }
+  const send = form.querySelector('button[type="submit"]');
+  send.disabled = true;
+  formNote.textContent = 'Sending...';
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        subject: 'Portfolio message from ' + f.name.value.trim(),
+        name: f.name.value.trim(),
+        email: f.email.value.trim(),
+        phone: f.phone.value.trim() || 'Not provided',
+        message: f.message.value.trim()
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok && data.success) { form.reset(); formNote.textContent = 'Message sent. Thank you!'; }
+    else formNote.textContent = 'The message could not be sent. Please try again.';
+  } catch (err) {
+    formNote.textContent = 'The message could not be sent. Check your connection and try again.';
+  }
+  send.disabled = false;
 });
 
 /* ---------- SQL playground ---------- */
